@@ -14,21 +14,22 @@ function sleep(milliseconds) {
 
 function savedate(){
     const date = new Date()
-    console.log(date.getMonth(), date.getDate())
-    localStorage.setItem("oldDate", localStorage.getItem("newDate"))
-    localStorage.setItem("newDate", date)   
+    const datesaved = new Date(localStorage.getItem("newDate"))
+    
+    localStorage.setItem("oldDate", datesaved)
+    localStorage.setItem("newDate", date)
+           
 }
 
 let ntrials = null
-const maxNtrials = 50
+const maxNtrials = 100
 
 function resetNtrials(){
     dateOld = new Date(localStorage.getItem("oldDate"))
     dateNew = new Date(localStorage.getItem("newDate"))
 
     if (!((dateOld.getMonth() == dateNew.getMonth()) 
-        && (dateOld.getDate() == dateNew.getDate())) || true){
-        
+        && (dateOld.getDate() == dateNew.getDate()))){
         ntrials = 0
         localStorage.setItem("ntry", ntrials)
     }
@@ -102,6 +103,7 @@ let nhints = 0
 
 function new_equivalency(){
     ntrials = localStorage.getItem("ntry")
+    console.log(ntrials, maxNtrials)
     if (ntrials < maxNtrials){
         const [un_, exp_] = get_units()
         exp = exp_
@@ -120,7 +122,7 @@ function new_equivalency(){
         ntrials+=1;
     }
     else{
-        console.log("tentativi esauriti per oggi. Riprova domani")
+        confirmOn("button2")
     }
     localStorage.setItem("ntry", ntrials)
     
@@ -155,7 +157,6 @@ function fillTableLine(lineElement, ind1, ind2, fillDigit="", unitInd="left"){
 
     for (let iCase = 0; iCase<2; ++iCase){
         for (let i=0; conditions1[iCase](i); ++i){
-            console.log(i)
             for (let j=0; j<exp; ++j){
                 let digit = null
                 if(j+i*exp < arrays[iCase].length){
@@ -237,37 +238,59 @@ function glowEquBox(){
 }
 
 
-function confirmOn() {
-    document.querySelector(".confirmChange").style.display = "inline-block";
-    document.querySelector(".confirmChange").style.visibility = "visible";
+
+function confirmOn(s = "button1") {
+    console.log(s)
+    document.querySelector("." + `${s}`).style.display = "inline-block";
+    document.querySelector("." + `${s}`).style.visibility = "visible";
 }
 
-function confirmOff() {
-    document.querySelector(".confirmChange").style.display = "none";
-    document.querySelector(".confirmChange").style.visibility = "hidden";
+function confirmOff(s = "button1") {
+    document.querySelector("." + `${s}`).style.display = "none";
+    document.querySelector("." + `${s}`).style.visibility = "hidden";
 } 
 
 localStorage.setItem("newDate",new Date())
 savedate()
 resetNtrials()
 new_equivalency() //initialize cell with first quiz
-equivalence_field.addEventListener("click", confirmOn)
-document.querySelector("div.ok").addEventListener("click", function(){
+equivalence_field.addEventListener("click", function(){confirmOn()})
+
+document.querySelector(".button1 > .choice > div.ok").addEventListener("click", function(){
+    confirmOff()
     new_equivalency()
+})
+document.querySelector(".button1 > .choice > div.ok").addEventListener("click", function(){
     confirmOff()
 })
-document.querySelector("div.no").addEventListener("click", function(){
-    confirmOff()
+document.querySelector(".button2 > .choice > div.ok").addEventListener("click", function(){
+    confirmOff("button2")
 })
 hint_field.addEventListener("click", function(){
-    hintTable(nhints)
+
     if (nhints == 0){
-        sleep(1000)
-        hint_field.textContent = "Soluzione"        
+        sleep(500)
+        hint_field.textContent = "Soluzione"
+        hintTable(nhints)
+        nhints = Math.min(nhints+1, 2)        
     }
     else if(nhints == 1){
-        sleep(1000)
-        hint_field.innerHTML = "Clicca il box dell'equivalenza<br>per nuovo esercizio"
+        const nsecs = 20
+        let i = 0;
+        hint_field.pointerEvents = "none"
+        var refresh = setInterval(function(){
+            hint_field.innerHTML = "Soluzione tra<br>" + `${nsecs-i}` + "s"
+            i += 1;
+            if (i > nsecs){
+                clearInterval(refresh)
+                hintTable(nhints)
+                nhints = Math.min(nhints+1, 2)
+                hint_field.pointerEvents = "auto"
+                hint_field.innerHTML = "Clicca il box dell'equivalenza<br>per nuovo esercizio"
+            }
+        }
+            , 1000)    
+        
     }
     else if(nhints == 2){
         hint_field.innerHTML = "Clicca il box dell'equivalenza<br>per nuovo esercizio"
@@ -276,7 +299,7 @@ hint_field.addEventListener("click", function(){
     else{
         throw Error(`unexpected value for 'nhints' (${nhints})`)
     }
-    nhints = Math.min(nhints+1, 2)
+    
     
 })
 
