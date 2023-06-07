@@ -20,7 +20,7 @@ function savedate(){
 }
 
 let ntrials = null
-const maxNtrials = 5
+const maxNtrials = 50
 
 function resetNtrials(){
     dateOld = new Date(localStorage.getItem("oldDate"))
