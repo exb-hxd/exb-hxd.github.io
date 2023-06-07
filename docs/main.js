@@ -22,7 +22,7 @@ function savedate(){
 }
 
 let ntrials = null
-const maxNtrials = 100
+const maxNtrials = 10
 
 function resetNtrials(){
     dateOld = new Date(localStorage.getItem("oldDate"))
@@ -102,7 +102,7 @@ let nhints = 0
 
 
 function new_equivalency(){
-    ntrials = localStorage.getItem("ntry")
+    ntrials = +localStorage.getItem("ntry")
     console.log(ntrials, maxNtrials)
     if (ntrials < maxNtrials){
         const [un_, exp_] = get_units()
@@ -260,7 +260,7 @@ document.querySelector(".button1 > .choice > div.ok").addEventListener("click", 
     confirmOff()
     new_equivalency()
 })
-document.querySelector(".button1 > .choice > div.ok").addEventListener("click", function(){
+document.querySelector(".button1 > .choice > div.no").addEventListener("click", function(){
     confirmOff()
 })
 document.querySelector(".button2 > .choice > div.ok").addEventListener("click", function(){
